@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('58.jpg');
+            background-size: cover;
+        }
+        .container {
+            width: 320px;
+            margin: 60px auto;
+            background: #fff;
+            padding: 30px 32px 24px 32px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 24px rgba(0,0,0,0.09);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            margin: 12px 0 6px 0;
+        }
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 6px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 9px;
+            margin: 12px 0 0 0;
+            border: none;
+            background: #0078d7;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        .switch-link {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .switch-link a {
+            cursor: pointer;
+            color: #0078d7;
+            text-decoration: underline;
+        }
+        .msg {
+            text-align: center;
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 14px;
+            min-height: 18px;
+        }
+        .success {
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginContainer">
+        <% if (message) { %>
+            <p style="color: red;"><%= message %></p>
+        <% } %>
+        <h2>Login</h2>
+        <div class="msg" id="loginMsg"></div>
+        <form id="loginForm" action="/login" autocomplete="off" method="post">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" name="username" required>
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div class="switch-link">
+            Don't have an account? <a id="showRegister" href="/register">Register</a>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        // Simple local storage users database for demo purposes
+        
+
+        // Switch between pages
+        const loginContainer = document.getElementById('loginContainer');
+        const registerContainer = document.getElementById('registerContainer');
+        document.getElementById('showRegister').onclick = function() {
+            loginContainer.style.display = "none";
+            registerContainer.style.display = "block";
+            document.getElementById('registerMsg').textContent = "";
+        }
+        document.getElementById('showLogin').onclick = function() {
+            registerContainer.style.display = "none";
+            loginContainer.style.display = "block";
+            document.getElementById('loginMsg').textContent = "";
+        }
+
+        // Login form submit
+        document.getElementById('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const msg = document.getElementById('loginMsg');
+            msg.textContent = "";
+            msg.classList.remove('success');
+            // Demo only: fetch from localStorage
+            const users = getUsers();
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                msg.textContent = "Login successful!";
+                msg.classList.add('success');
+            } else {
+                msg.textContent = "Invalid username or password!";
+            }
+        }
+
+        // Register form submit
+        document.getElementById('registerForm').onsubmit = function(e) {
+            
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const msg = document.getElementById('registerMsg');
+            msg.classList.remove('success');
+            msg.textContent = "";
+
+            if (!/^[\w]{3,20}$/.test(username)) {
+                msg.textContent = "Username must be 3-20 characters (letters, numbers, _)";
+                return;
+            }
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                msg.textContent = "Invalid email address!";
+                return;
+            }
+            if (password.length < 6) {
+                msg.textContent = "Password must be at least 6 characters!";
+                return;
+            }
+            if (password !== confirmPassword) {
+                msg.textContent = "Passwords do not match!";
+                return;
+            }
+            const users = getUsers();
+            if (users.find(u => u.username === username)) {
+                msg.textContent = "Username already exists!";
+                return;
+            }
+            // // Register user
+            // users.push({username, email, password});
+            // setUsers(users);
+            // msg.textContent = "Registration successful! You may now login.";
+            // msg.classList.add('success');
+            // setTimeout(() => {
+            //     registerContainer.style.display = "none";
+            //     loginContainer.style.display = "block";
+            //     document.getElementById('loginMsg').textContent = "";
+            // }, 900);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+            padding: 32px;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: #374151;
+            letter-spacing: 1px;
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+        .btn-add {
+            background: #22c55e;
+            color: #fff;
+        }
+        .btn-add:hover {
+            background: #16a34a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fafbfc;
+        }
+        th, td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.97rem;
+            margin-right: 6px;
+            transition: background 0.15s;
+        }
+        .btn-edit {
+            background: #38bdf8;
+            color: white;
+        }
+        .btn-edit:hover {
+            background: #0ea5e9;
+        }
+        .btn-delete {
+            background: #f87171;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #ef4444;
+        }
+        /* Edit/Add Modal */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.15);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: #ffffff;
+            padding: 32px 28px;
+            border-radius: 8px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.09);
+            max-width: 350px;
+            width: 100%;
+        }
+        .modal label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+        .modal input {
+            width: 100%;
+            padding: 9px 7px;
+            margin-bottom: 19px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .modal-actions {
+            text-align: right;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            margin-right: 4px;
+        }
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        
+        <h1>Admin Dashboard</h1>
+        <div class="actions-bar">
+            <button class="btn btn-add" id="open-add-modal">Add User</button>
+        </div>
+        <table id="users-table">
+            <thead>
+                <tr>
+                    <th style="width: 6%;">#</th>
+                    <th style="width: 6%;">Username</th>
+                    <!-- <th style="width: 26%;">Password</th> -->
+                    
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                <!-- JS inserts rows here -->
+            </tbody>
+            <% for(let i = 0;i<user.length;i++){ %>
+            <tbody>
+                <tr>
+                    <td>
+                        <%= user[i].username%>
+                    </td>
+                    <td>
+                        <%= user[i].email%>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td>
+                        <a id="open-edit-modal" href="/admin/adminEdit/<%= user[i]._id %>"><button  type="button" class="btn btn-edit">
+                        Edit
+                    </button></a>
+                    </td>
+                    <td>
+                        <a href="/admin/adminDelete/<%= user[i]._id %>"><button  type="button" class="btn btn-delete">
+                        delete
+                    </button></a>
+
+                    
+
+                    
+                    </td>
+                </tr>
+            </tbody>
+        <% } %>
+        </table>
+        
+    </div>
+
+
+    
+    
+
+    <!-- Edit Modal -->
+    <div class="modal-bg" id="edit-modal-bg">
+        <div class="modal">
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <label for="edit-username">Username:</label>
+                <input type="text" id="edit-username" required>
+                <label for="edit-email">Email:</label>
+                <input type="email" id="edit-email" required>
+                <label for="edit-role">Role:</label>
+                <input type="text" id="edit-role" required>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="btn btn-edit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <% if (adderror!='') { %>
+        <script>
+            alert("Creadential wrong")
+        </script>
+    <% } %>
+    <!-- Add User Modal -->
+    <div class="modal-bg" id="add-modal-bg">
+        <div class="modal">
+            
+            <h2>Add User</h2>
+            <form id="add-user-form" action="/admin/addUser" method="post">
+                <label for="add-username">Username:</label>
+                <input type="text" id="add-username" name="username" required>
+                <label for="add-email">Email:</label>
+                <input type="email" id="add-email" name="email" required>
+                <label for="add-role">Password:</label>
+                <input type="password" id="add-role" name="password" required>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancel-add">Cancel</button>
+                    <button type="submit" class="btn btn-add">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <button class="btn btn-add" style="margin-bottom: 50px;margin-left: 20px;">
+        <a href="/admin/logout">Logout</a>
+    </button>
+    
+    <script>
+        // // Simulated database (in real app, fetch this from backend)
+        // let users = [
+        //     {id: 1, username: "alice", email: "alice@email.com", role: "Admin"},
+        //     {id: 2, username: "bob", email: "bob@email.com", role: "Editor"},
+        //     {id: 3, username: "charlie", email: "charlie@email.com", role: "Viewer"},
+        //     {id: 4, username: "dana", email: "dana@email.com", role: "Editor"}
+        // ];
+
+        
+        // --- Add User Modal Logic ---
+        document.getElementById('open-add-modal').onclick = function() {
+            document.getElementById('add-user-form').reset();
+            document.getElementById('add-modal-bg').style.display = 'flex';
+        }
+
+        document.getElementById('cancel-add').onclick = function() {
+            document.getElementById('add-modal-bg').style.display = 'none';
+        }
+         document.getElementById('open-edit-modal').onclick = function() {
+            document.getElementById('add-user-form').reset();
+            document.getElementById('add-modal-bg').style.display = 'flex';
+        }
+
+        // document.getElementById('add-user-form').onsubmit = function(e) {
+        //     e.preventDefault();
+        //     // Generate a new unique id (simply max + 1 for demo)
+        //     const username = document.getElementById('add-username').value;
+        //     const email = document.getElementById('add-email').value;
+        //     const role = document.getElementById('add-role').value;
+        //     let maxId = users.length > 0 ? Math.max(...users.map(u => u.id)) : 0;
+        //     users.push({id: maxId+1, username, email, role});
+        //     renderTable();
+        //     document.getElementById('add-modal-bg').style.display = 'none';
+        // }
+
+        // // Dismiss modal on background click (Add)
+        // document.getElementById('add-modal-bg').onclick = function(e) {
+        //     if (e.target === document.getElementById('add-modal-bg')) {
+        //         this.style.display = 'none';
+        //     }
+        // };
+
+        // // Initial render
+        // renderTable();
+    </script>
+</body>
+</html>

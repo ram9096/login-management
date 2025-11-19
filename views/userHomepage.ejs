@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Homepage</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('58.jpg');
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 32px 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 16px;
+      color: #333;
+    }
+    p {
+      margin-bottom: 32px;
+      color: #666;
+    }
+    .logout-btn {
+      background: #ff5353;
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover {
+      background: #d11a2a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the Homepage!</h1>
+    <p>You are now logged in. Explore the site or log out when you're done.</p>
+    <button class="logout-btn" ><a href="/logout">Logout</a></button>
+  </div>
+  
+</body>
+</html>
