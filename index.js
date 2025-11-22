@@ -4,6 +4,7 @@ let nocache = require('nocache')
 let userLogin = require('./routes/userLogin')
 let admin = require('./routes/adminRouter')
 let session = require('express-session')
+const morgan = require('morgan');
 
 
 
@@ -12,8 +13,9 @@ app.set('view engine','ejs')
 app.use(express.urlencoded({extended:true}))
 
 
-const morgan = require('morgan');
 app.use(morgan('dev'));
+
+
 //Mongoose Connection set-up
 let mongoDbStore = require('connect-mongodb-session')(session)
 
@@ -30,8 +32,9 @@ let store = new mongoDbStore({
 })
 
 // Session setup
-app.use(nocache())
 
+
+app.use(nocache())
 app.use(session({
     secret:"Key",
     resave:false,
@@ -46,6 +49,17 @@ app.use('/admin',admin)
 app.use('/',(req,res)=>{
     res.send("404")
 })
+
+
+app.use((err, req, res, next) => {
+    console.error("Error:", err.message);
+    console.error(err.stack);
+
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
 
 app.listen(5000,()=>{
     console.log("Server is running")

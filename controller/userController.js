@@ -40,22 +40,6 @@ const register = (req,res)=>{
 const registerPost = async (req,res)=>{
     try {
         const {userName,passWord,email} = req.body
-        // let user = await userModel.findOne({email})
-        // if(user){
-        //     return res.render('register',{message:"User already exist"})
-        // }
-        // let hash = await bcrypt.hash(passWord,10)
-        // user  = new userModel({
-        //     username:userName,
-        //     email:email,
-        //     password:hash
-        // })
-        // await user.save()
-
-        // req.session.userName = userName
-        // req.session.isAuth = true
-
-        
         const result = await userServise.userRegister(userName,passWord,email)
         if(!result.success){
             return res.status(409).render('register',{message:result.message})
@@ -66,9 +50,6 @@ const registerPost = async (req,res)=>{
         res.redirect('/home')
 
     }catch(err){
-        // if (err.code === 11000) {
-        //     return res.status(409).json({ message: "Email already exists" });
-        // }
         res.status(500).render('userLogin',{message:'Server error'})
 
     }

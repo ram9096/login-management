@@ -20,24 +20,6 @@ const loginLoad = async(username,password)=>{
     }
 }
 
-const editUser = async(username,email,id)=>{
-    console.log(id)
-    let user = await userModel.findById({_id:id})
-    if(user){
-        return {success:false}
-    }
-    
-    user.username = username
-    user.email = email
-
-    await user.save()
-    console.log(user)
-    let user1 = await userModel.find()
-
-
-    return {success:true,user1:user1}
-}
-
 
 const deleteUser = async (id)=>{
     await userModel.deleteOne({_id:id})
@@ -60,4 +42,4 @@ const addUser = async(username,password,email)=>{
     await use.save()
     return {success:true}
 }
-module.exports = {loginLoad,loadModel,editUser,deleteUser,addUser}
+module.exports = {loginLoad,loadModel,deleteUser,addUser}

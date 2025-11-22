@@ -1,7 +1,7 @@
 let Schema = require('../models/adminModel')
 let bcrypt = require('bcrypt')
 let userModel = require('../models/userModel')
-let id = ''
+//let id = ''
 let adminService = require('../service/adminService')
 
 
@@ -11,6 +11,14 @@ const isAuth = (req,res,next)=>{
         return next()
     }else{
         res.redirect('/admin')
+    }
+}
+
+const isAdmin = (req,res,next)=>{
+    if(req.session.role == 'admin'){
+        next()
+    }else{
+        res.status(403).send("Forbidden access")
     }
 }
 const isUserId = (req,res,next)=>{
@@ -24,8 +32,12 @@ const loginLoad = async (req,res)=>{
     try{
         if(req.session.isAdmin){
             let user = await adminService.loadModel()
+                
             return res.render('adminHomepage',{user:user,adderror:''})
+        
         }
+
+
         res.render('adminLogin',{message:''})
     }catch{
         res.status(500).send("Internal error")
@@ -41,6 +53,7 @@ const verifyLogin = async (req,res)=>{
             return res.status(401).render("adminLogin",{message: user.message})
         }
         req.session.isAdmin = true
+        req.session.role = 'admin'
         res.redirect('/admin')
     }catch{
         res.status(500).send('Internal error')
@@ -55,6 +68,8 @@ const home = async (req,res)=>{
         }
 
         const user = await adminService.loadModel()
+
+        console.log(user)
     
         res.render('adminHomepage',{user:user,adderror:''})
 
@@ -63,39 +78,38 @@ const home = async (req,res)=>{
     }
 }
 
+const preventCache = (req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
+};
+
 const editUser = async(req,res)=>{
-    try{
-        if(!req.session.isAdmin){
-            return res.redirect('/')
-        }
-        let user = await userModel.findById(req.params.id)
-        req.session.userId = req.params.id
-        //console.log(req.session.userId)
-        res.render('adminEdit',{id:user})
-    }catch{
-        res.status(500)
+    if(!req.session.isAdmin){
+        return res.redirect('/')
     }
-    
+    req.session.editUser = req.params.id;
+
+    let user = await userModel.findById(req.params.id);
+
+    res.render('adminEdit',{ user });
 }
+
 const userEdit = async (req,res)=>{
-    try{
-        if(!req.session.isAdmin){
-            return res.redirect('/')
-        }
-        let {username,email} = req.body
-        console.log(req.session.userId)
-        let user = await adminService.editUser(username,email,id)
-
-        if(!user.success){
-            return res.status(400).redirect('/admin')
-        }
-        req.session.userId = false
-        res.redirect('/admin')
-
-    }catch{
-        res.status(500)
+    if(!req.session.isAdmin){
+        return res.redirect('/')
     }
-}
+
+    let { username, email } = req.body;
+    let id = req.session.editUser;
+
+    let user = await userModel.findById(id);
+    if (!user) return res.send("404");
+
+    await userModel.findByIdAndUpdate(id, { username, email });
+
+    res.redirect('/admin');
+};
+
 const adminDelete = async (req,res)=>{
     try{
         if(!req.session.isAdmin){
@@ -134,4 +148,4 @@ const logout = (req,res)=>{
     res.redirect('/admin'); 
   });
 }
-module.exports = {loginLoad,verifyLogin,home,editUser,userEdit,adminDelete,isAuth,addUser,logout,isUserId}
+module.exports = {loginLoad,verifyLogin,home,editUser,userEdit,adminDelete,isAuth,addUser,logout,isUserId,preventCache,isAdmin}

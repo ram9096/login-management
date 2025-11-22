@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body {
             background: #f6f8fa;
@@ -28,6 +30,16 @@
             display: flex;
             justify-content: flex-end;
             margin-bottom: 16px;
+        }
+        .search-bar {
+            margin-bottom: 20px;
+        }
+        .search-input {
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 250px;
         }
         .btn-add {
             background: #22c55e;
@@ -124,58 +136,55 @@
     <div class="dashboard">
         
         <h1>Admin Dashboard</h1>
+
         <div class="actions-bar">
             <button class="btn btn-add" id="open-add-modal">Add User</button>
         </div>
+
+        <div class="search-bar">
+            <input
+                type="text"
+                id="search-user-input"
+                class="search-input"
+                placeholder="Search by Username or Email..."
+                autocomplete="off"
+            />
+        </div>
+
         <table id="users-table">
             <thead>
                 <tr>
-                    <th style="width: 6%;">#</th>
-                    <th style="width: 6%;">Username</th>
-                    <!-- <th style="width: 26%;">Password</th> -->
-                    
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="users-tbody">
-                <!-- JS inserts rows here -->
-            </tbody>
-            <% for(let i = 0;i<user.length;i++){ %>
-            <tbody>
-                <tr>
-                    <td>
-                        <%= user[i].username%>
-                    </td>
-                    <td>
-                        <%= user[i].email%>
-                    </td>
-                    
-                </tr>
-                <tr>
-                    <td>
-                        <a id="open-edit-modal" href="/admin/adminEdit/<%= user[i]._id %>"><button  type="button" class="btn btn-edit">
-                        Edit
-                    </button></a>
-                    </td>
-                    <td>
-                        <a href="/admin/adminDelete/<%= user[i]._id %>"><button  type="button" class="btn btn-delete">
-                        delete
-                    </button></a>
 
-                    
-
-                    
-                    </td>
-                </tr>
+            <tbody id="users-table-body">
+                <% for (let i = 0; i < user.length; i++) { %>
+                    <tr data-username="<%= user[i].username.toLowerCase() %>" data-email="<%= user[i].email.toLowerCase() %>">
+                        <td><%= i + 1 %></td>
+                        <td><%= user[i].username %></td>
+                        <td><%= user[i].email %></td>
+                        <td>
+                            <!-- Edit button -->
+                            <a href="/admin/adminEdit/<%= user[i]._id %>">
+                                <button type="button" class="btn btn-edit">Edit</button>
+                            </a>
+                            <!-- Delete button -->
+                            <!-- <a href="/admin/adminDelete/">
+                                <button type="button" class="btn btn-delete">Delete</button>
+                            </a> -->
+                             <button type="button" onclick="deleteUser('<%= user[i]._id %>')" class="btn btn-delete">Delete</button>
+                        </td>
+                    </tr>
+                <% } %>
             </tbody>
-        <% } %>
         </table>
         
     </div>
-
-
     
-    
-
     <!-- Edit Modal -->
     <div class="modal-bg" id="edit-modal-bg">
         <div class="modal">
@@ -224,15 +233,6 @@
     </button>
     
     <script>
-        // // Simulated database (in real app, fetch this from backend)
-        // let users = [
-        //     {id: 1, username: "alice", email: "alice@email.com", role: "Admin"},
-        //     {id: 2, username: "bob", email: "bob@email.com", role: "Editor"},
-        //     {id: 3, username: "charlie", email: "charlie@email.com", role: "Viewer"},
-        //     {id: 4, username: "dana", email: "dana@email.com", role: "Editor"}
-        // ];
-
-        
         // --- Add User Modal Logic ---
         document.getElementById('open-add-modal').onclick = function() {
             document.getElementById('add-user-form').reset();
@@ -242,32 +242,58 @@
         document.getElementById('cancel-add').onclick = function() {
             document.getElementById('add-modal-bg').style.display = 'none';
         }
-         document.getElementById('open-edit-modal').onclick = function() {
-            document.getElementById('add-user-form').reset();
-            document.getElementById('add-modal-bg').style.display = 'flex';
+        if (document.getElementById('open-edit-modal')) {
+            document.getElementById('open-edit-modal').onclick = function() {
+                document.getElementById('add-user-form').reset();
+                document.getElementById('add-modal-bg').style.display = 'flex';
+            }
         }
 
-        // document.getElementById('add-user-form').onsubmit = function(e) {
-        //     e.preventDefault();
-        //     // Generate a new unique id (simply max + 1 for demo)
-        //     const username = document.getElementById('add-username').value;
-        //     const email = document.getElementById('add-email').value;
-        //     const role = document.getElementById('add-role').value;
-        //     let maxId = users.length > 0 ? Math.max(...users.map(u => u.id)) : 0;
-        //     users.push({id: maxId+1, username, email, role});
-        //     renderTable();
-        //     document.getElementById('add-modal-bg').style.display = 'none';
-        // }
+        function deleteUser(id){
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This user will be permanently deleted!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/adminDelete/${id}`;
+                }
+            });
+        }
 
-        // // Dismiss modal on background click (Add)
-        // document.getElementById('add-modal-bg').onclick = function(e) {
-        //     if (e.target === document.getElementById('add-modal-bg')) {
-        //         this.style.display = 'none';
-        //     }
-        // };
-
-        // // Initial render
-        // renderTable();
+        // --- Search Functionality ---
+        document.getElementById('search-user-input').addEventListener('input', function() {
+            const searchValue = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#users-table-body tr');
+            let visibleCount = 0;
+            rows.forEach(function(row, idx) {
+                const username = row.getAttribute('data-username') || '';
+                const email = row.getAttribute('data-email') || '';
+                if (
+                    searchValue === '' ||
+                    username.includes(searchValue) ||
+                    email.includes(searchValue)
+                ) {
+                    row.style.display = '';
+                    // display the row number (in case rows are filtered, update numbers)
+                    row.querySelector('td').textContent = (++visibleCount).toString();
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            // Reset numbering if no search
+            if (searchValue === '') {
+                let c = 1;
+                rows.forEach(function(row) {
+                    if (row.style.display !== 'none') {
+                        row.querySelector('td').textContent = c++;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

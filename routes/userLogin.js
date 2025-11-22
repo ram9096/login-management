@@ -3,7 +3,6 @@ let app = express.Router()
 const userModel = require('../models/userModel')
 let nocache = require('nocache')
 let bcrypt = require('bcrypt')
-
 const userController = require('../controller/userController')
 
 
